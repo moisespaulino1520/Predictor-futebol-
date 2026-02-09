@@ -3,7 +3,7 @@ const axios = require('axios');
 const { calculateProbability } = require('./utils/math');
 const app = express();
 
-const API_KEY = ('5e51c97697msha837de25cc6a258p1a4b9ejsn2fba20317a74';)
+const API_KEY = ('9b1d9612f8d7201a597625d23c6bc2db9aae097d44129bcbcc36d84c987d50c8';)
 const HEADERS = { 'x-rapidapi-key': API_KEY, 'x-rapidapi-host': 'v3.football.api-sports.io' };
 
 app.set('view engine', 'ejs');
