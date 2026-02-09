@@ -10,12 +10,11 @@
     <div class="container bg-secondary rounded p-4 shadow-lg" style="max-width: 500px;">
         
         <form action="/" method="GET" class="mb-4">
-            <label class="form-label">Introduzir ID da Equipa:</label>
+            <label class="form-label">Nome da Equipa:</label>
             <div class="input-group">
-                <input type="number" name="teamId" class="form-control" placeholder="Ex: 33" required>
+                <input type="text" name="teamName" class="form-control" placeholder="Ex: Porto, Flamengo, Barcelona" required>
                 <button class="btn btn-warning" type="submit">🔍 Analisar</button>
             </div>
-            <small class="text-light opacity-75">Man Utd: 33 | Real Madrid: 541 | Benfica: 211</small>
         </form>
 
         <h2 class="text-center mb-0">📊 <%= teamName %></h2>
@@ -63,4 +62,5 @@
     </div>
 </body>
 </html>
+
 
