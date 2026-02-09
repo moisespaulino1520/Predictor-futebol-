@@ -10,7 +10,19 @@ app.set('view engine', 'ejs');
 
 app.get('/', async (req, res) => {
     try {
-        const teamId = 33; // Manchester United (Podes mudar o ID depois)
+        const queryName = req.query.teamName || 'Manchester United';
+        
+        // 1. BUSCAR O ID PELO NOME
+        const searchRes = await axios.get(`https://v3.football.api-sports.io/teams?search=${queryName}`, { headers: HEADERS });
+        
+        if (!searchRes.data.response || searchRes.data.response.length === 0) {
+            return res.render('index', { games: [], predictions: { moreThan8Corners: 0, moreThan3Cards: 0 }, teamName: "Time não encontrado" });
+        }
+
+        const teamId = searchRes.data.response[0].team.id;
+        const realTeamName = searchRes.data.response[0].team.name;
+
+        // 2. BUSCAR OS ÚLTIMOS 5 JOGOS
         const response = await axios.get(`https://v3.football.api-sports.io/fixtures?team=${teamId}&last=5`, { headers: HEADERS });
         
         let statsSum = { corners: 0, cards: 0, offsides: 0 };
@@ -20,13 +32,16 @@ app.get('/', async (req, res) => {
             const fId = match.fixture.id;
             const sRes = await axios.get(`https://v3.football.api-sports.io/fixtures/statistics?fixture=${fId}&team=${teamId}`, { headers: HEADERS });
             
-            const findStat = (type) => sRes.data.response[0]?.statistics.find(s => s.type === type)?.value || 0;
+            const findStat = (type) => {
+                const stat = sRes.data.response[0]?.statistics.find(s => s.type === type);
+                return stat ? parseInt(stat.value) || 0 : 0;
+            };
             
             const gameData = {
                 date: match.fixture.date.split('T')[0],
-                corners: parseInt(findStat('Corner Kicks')),
-                cards: parseInt(findStat('Yellow Cards')),
-                offsides: parseInt(findStat('Offsides'))
+                corners: findStat('Corner Kicks'),
+                cards: findStat('Yellow Cards'),
+                offsides: findStat('Offsides')
             };
             
             statsSum.corners += gameData.corners;
@@ -41,9 +56,13 @@ app.get('/', async (req, res) => {
             moreThan3Cards: calculateProbability(averages.cards, 3)
         };
 
-        res.render('index', { games, predictions, teamName: "Manchester United" });
-    } catch (err) { res.send("Erro: Liga a tua API Key primeiro no server.js"); }
+        res.render('index', { games, predictions, teamName: realTeamName });
+
+    } catch (err) { 
+        res.send("Erro na busca. Verifique se escreveu o nome corretamente ou sua API Key."); 
+    }
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('Servidor Online!'));
+
